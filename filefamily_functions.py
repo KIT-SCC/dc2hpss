@@ -29,3 +29,66 @@ def get_ff(entity, vo_configuration, test_mode=False, big_data=False) -> int:
             else:
                 return -1
             return ff_number
+        elif vo_configuration["VO"] == "atlas":
+            ff_dict = {
+                "data": {
+                    "/AOD": [810, 811],
+                    "/DAOD": [812],
+                    "/RAW": [813, 814, 815],
+                    "/DRAW": [816],
+                    "/DESDM": [817],
+                    "/ESD": [818],
+                    "REST": [819],
+                },
+                "mc": {
+                    "/AOD": [830, 831, 832, 833],
+                    "/DAOD": [834],
+                    "/DESDM": [835],
+                    "/HITS": [836, 837, 838, 839],
+                    "/EVNT": [840],
+                    "/ESD": [841],
+                    "REST": [842],
+                },
+                "user": {
+                    "/AOD": [850],
+                    "/DAOD": [851],
+                    "/RAW": [852],
+                    "REST": [853],
+                },
+            }
+            data_list = vo_configuration["lfn_data_paths"]
+            mc_list = vo_configuration["lfn_mc_paths"]
+            ff_number = -1
+            ds_hash_number = int(
+                hashlib.sha1(entity.encode("utf-8")).hexdigest()[:2], 16
+            )
+            datatype = None
+            if "/user" in entity:  # should be consistent with VO configuration
+                datatype = "user"
+            elif any([subpath in entity for subpath in mc_list]):
+                datatype = "mc"
+            elif any([subpath in entity for subpath in data_list]):
+                datatype = "data"
+            # Check if main data type is properly determined
+            if datatype:
+                found_datatier = False
+                for datatier in ff_dict[datatype]:
+                    if datatier == "REST":
+                        continue
+                    if datatier in entity:
+                        found_datatier = True
+                        if len(ff_dict[datatype][datatier]) == 1:
+                            ff_number = ff_dict[datatype][datatier][0]
+                        else:
+                            index = ds_hash_number % len(ff_dict[datatype][datatier])
+                            ff_number = ff_dict[datatype][datatier][index]
+                        break
+                # Catch case, when none of the main datatiers is matching
+                if not found_datatier:
+                    datatier = "REST"
+                    if len(ff_dict[datatype][datatier]) == 1:
+                        ff_number = ff_dict[datatype][datatier][0]
+                    else:
+                        index = ds_hash_number % len(ff_dict[datatype][datatier])
+                        ff_number = ff_dict[datatype][datatier][index]
+            return ff_number
