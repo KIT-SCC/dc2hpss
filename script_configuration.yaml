@@ -1,0 +1,6 @@
+log_level: DEBUG
+pftp_command: /path/to/pftp_client hpss.server.name.edu 4021
+hpsssum_command:  /path/to/hpsssum -k -t {keytab} -p {hpssuser} -f {hpsspath} -u verify -b 5242880
+log_output: /var/log/hpss/dc2hpss_writing.log
+vo_list: [test]
+uri_prefix_pattern: (.*):\/\/hpss

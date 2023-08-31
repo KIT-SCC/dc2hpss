@@ -1,0 +1,17 @@
+The dc2hpss software initiates writing of a single file to tape.
+dc2hpss is simple interface between dCache and High Performance Storage System (HPSS).
+Scheduling of write transfers is taken care of by dCache in that case.
+Copyright (C) 2022  Artur Gottmann <artur.gottmann@kit.edu>
+
+dc2hpss is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
+ 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with dc2hpss. If not, see <https://www.gnu.org/licenses/>.
