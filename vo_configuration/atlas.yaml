@@ -1,0 +1,17 @@
+# Configuring ATLAS specific information for HPSS
+VO : atlas
+pnfs_path : /pnfs/gridka.de/atlas/
+file_pattern : ^(.*?)\/[a-zA-Z\.0-9\_\-]*?(\.root|\.zip|\.tar\.xz|\.tgz|\.raw|\.log|\.data|\.\_lb|\.xml|\.\_[0-9][0-9][0-9][0-9]\.|\.1)[\.\_a-zA-Z0-9\-]*$
+cos : 81
+data_filefamilies : [810, 811, 812, 813, 814, 815, 816, 817, 818, 819]
+mc_filefamilies : [830, 831, 832, 833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 850, 851, 852, 853]
+bigdata_filefamilies : [860, 861, 862, 863, 864, 865, 866, 867]
+test_filefamilies : []
+test_folders : []
+bigdata_threshold :  4.e13 # in Bytes
+bigdata_attribute : xattr.dataset_bytes
+lfn_data_paths : [/data]
+lfn_mc_paths : [/mc, /valid, /user]
+fuse_mount : /GridKa-ATLAS
+keytab : /var/hpss/etc/scc-atlas-0001.unix.keytab
+hpssuser : scc-atlas-0001
