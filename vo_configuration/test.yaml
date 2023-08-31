@@ -1,0 +1,17 @@
+# Configuring TEST specific information for HPSS
+VO : test
+pnfs_path : /pnfs/path/to/test/
+file_pattern : ^(.*?)\/[0-9A-Fa-f\-]*?\.file$
+cos : 99
+data_filefamilies : [991, 992, 993, 994, 995, 996, 997, 998]
+mc_filefamilies : []
+bigdata_filefamilies : []
+test_filefamilies : []
+test_folders : []
+bigdata_threshold :  4.e13 # in Bytes
+bigdata_attribute : xattr.dataset_bytes
+lfn_data_paths : [/data]
+lfn_mc_paths : []
+fuse_mount : /TEST
+keytab : /var/hpss/etc/test-0001.unix.keytab
+hpssuser : test-0001
