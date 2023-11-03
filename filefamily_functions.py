@@ -50,9 +50,7 @@ def get_ff(entity, vo_configuration, test_mode=False, big_data=False) -> int:
                     "REST": [842],
                 },
                 "user": {
-                    "/AOD": [850],
-                    "/DAOD": [851],
-                    "/RAW": [852],
+                    "DAOD": [852],
                     "REST": [853],
                 },
             }
@@ -63,7 +61,7 @@ def get_ff(entity, vo_configuration, test_mode=False, big_data=False) -> int:
                 hashlib.sha1(entity.encode("utf-8")).hexdigest()[:2], 16
             )
             datatype = None
-            if "/user" in entity or "atlaslocalgrouptape/hc_test" in entity:  # should be consistent with VO configuration
+            if "/user" in entity or "atlaslocalgrouptape/hc_test" in entity:
                 datatype = "user"
             elif any([subpath in entity for subpath in mc_list]):
                 datatype = "mc"

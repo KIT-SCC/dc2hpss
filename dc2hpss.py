@@ -182,6 +182,13 @@ def put(args):
         if filesize == 0:
             logger.error("File {} empty".format(args["filename"]))
             sys.exit(32)
+        elif filesize != int(args["storage_information"]["size"]):
+            logger.error(
+                "Size of file {} is {} Bytes, but expecting {} Bytes".format(
+                    args["filename"], filesize, int(args["storage_information"]["size"])
+                )
+            )
+            sys.exit(32)
 
     # Determine filefamily and submit pftp put command
     lfn = os.path.relpath(
@@ -534,6 +541,76 @@ def put(args):
         or len(hpsssum_command.stderr.decode("utf-8").strip()) > 0
     ):
         logger.error("hpsssum check failed for {}".format(hpss_filename))
+        returncode = 42  # Can be changed to a suspending exit code, in case the input file has wrong checksum
+
+        logger.debug(
+            "Calculating checksum for dCache input file at {}".format(args["filename"])
+        )
+        hpsssum_local = args["hpsssum_local_command"].format(localpath=args["filename"])
+        hpsssum_local_command = subprocess.run(
+            shlex.split(hpsssum_local), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        logger.debug(
+            "hpsssum local command returncode: {}".format(
+                hpsssum_local_command.returncode
+            )
+        )
+        logger.debug(
+            "hpsssum local command output:\n"
+            + hpsssum_local_command.stdout.decode("utf-8")
+        )
+        logger.debug(
+            "hpsssum local command errors:\n"
+            + hpsssum_local_command.stderr.decode("utf-8")
+        )
+        if (
+            hpsssum_local_command.returncode != 0
+            or len(hpsssum_local_command.stderr.decode("utf-8").strip()) > 0
+        ):
+            logger.error("hpsssum local check failed for {}".format(args["filename"]))
+            returncode = 32
+        else:
+            logger.debug(
+                "Searching for checksum in output of hpsssum local check for {}".format(
+                    args["filename"]
+                )
+            )
+            stdoutlist = [
+                l.strip()
+                for l in hpsssum_local_command.stdout.decode("utf-8")
+                .strip()
+                .split("\n")
+            ]
+            # Searching for the line containing the checksum
+            input_checksum = None
+            for l in stdoutlist:
+                if args["filename"] in l:
+                    input_checksum = l.split()[0]
+                    break
+            if input_checksum:
+                if input_checksum == checksums[0]:
+                    logger.debug(
+                        "Checksum of input file {} is correct {}. Problem encountered on HPSS side. Allowing dCache to repeat transfer.".format(
+                            args["filename"], input_checksum
+                        )
+                    )
+                    returncode = 42
+                else:
+                    logger.error(
+                        "Checksum of input file {} has a different value ({}) than expected from dCache ({}). Suspending transfer request.".format(
+                            args["filename"], input_checksum, checksums[0]
+                        )
+                    )
+                    returncode = 32
+            else:
+                logger.error(
+                    "hpsssum local check did not provide checksum for {}".format(
+                        args["filename"]
+                    )
+                )
+                returncode = 32
+
+        # General cleanup before exiting the script with error
         delete_input = "\n".join(
             [
                 "site setcos {}".format(args["vo_configuration"]["cos"]),
@@ -608,7 +685,7 @@ def put(args):
                     + delete_trashcan_command.stderr
                 )
                 break
-        sys.exit(42)
+        sys.exit(returncode)
 
     # After a successful checksum test, everything has worked out properly.
     logger.info(
